@@ -4,4 +4,4 @@ build:
 	yarn build
 
 run:
-	@$(COMPOSE) up -d --build
+	@$(COMPOSE) up --build

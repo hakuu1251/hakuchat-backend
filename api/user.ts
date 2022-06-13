@@ -4,7 +4,7 @@ import User from '../models/user'
 
 const userRouter = Router()
 
-userRouter.get('/users', (req: Request, res: Response) => {
+userRouter.get('/all', (req: Request, res: Response) => {
 	User.find().lean().exec((err, users) => {
 		return res.end(JSON.stringify(users))
 	})
@@ -20,7 +20,7 @@ userRouter.post('/', (req: Request, res: Response) => {
 
 	userDetails.save((err, doc) => {
 		if (!err) res.send(`User added successfully!`)
-		else res.send(`Error: ${err} :(`)
+		else res.send(`${err}`)
 	})
 })
 

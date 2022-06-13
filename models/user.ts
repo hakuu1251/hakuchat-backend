@@ -13,7 +13,7 @@ const userSchema = new Schema<IUser>({
 	domains: {
 		type: Array,
 		required: false,
-		unique: true,
+		unique: false,
 	},
 	type: {
 		type: String,

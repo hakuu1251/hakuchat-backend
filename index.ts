@@ -6,18 +6,19 @@ import api from './api'
 dotenv.config()
 const app: Express = express()
 const port = process.env.PORT
+const mongoDB: any = process.env.DATABASE_URL
 
 app.get('/', (req: Request, res: Response) => {
-  res.send('Express + TypeScript Server')
+	res.send('Express + TypeScript Server')
 })
 
 app.listen(port, () => {
-  console.log(`⚡️[server]: Server is running at https://localhost:${port}`)
+	console.log(`⚡️[server]: Server is running at https://localhost:${port}`)
 })
 
-connect(`mongodb://root:example@mongo:27017`, (err) => {
-  if (err) console.log(`⚡️[server]: MongoDB not connected. ${err}`)
-  console.log('⚡️[server]: MongoDB Connected');
+connect(mongoDB, (err) => {
+	if (err) console.log(`⚡️[server]: MongoDB not connected. ${err}`)
+	console.log('⚡️[server]: MongoDB Connected')
 })
 
 app.use(express.urlencoded({ extended: true }))

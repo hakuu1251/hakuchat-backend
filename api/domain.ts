@@ -1,10 +1,10 @@
-import express, { Router, Request, Response } from 'express'
+import { Router, Request, Response } from 'express'
 import Domain from '../models/domain'
 import User from '../models/user'
 
 const domainRouter = Router()
 
-domainRouter.post('/', (req: express.Request, res: express.Response) => {
+domainRouter.post('/', (req: Request, res: Response) => {
 	const isUser = User.findById(req.body.user['$id']).exec()
 	// console.log('[server]: ' + req.body.user['$id'])
 	isUser
