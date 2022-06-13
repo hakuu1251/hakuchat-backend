@@ -11,8 +11,8 @@ const domainSchema = new Schema<IDomain>({
 		validate: [validator.isURL, 'invalid URL']
 	},
 	user: {
-		type: Object,
-		required: true
+		type: Schema.Types.ObjectId,
+		ref: User
 	}
 })
 

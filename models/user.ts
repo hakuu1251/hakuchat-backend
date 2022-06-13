@@ -10,17 +10,17 @@ const userSchema = new Schema<IUser>({
 		unique: true,
 		validate: [validator.isEmail, 'invalid email']
 	},
-	domains: {
-		type: Array,
-		required: false,
-		unique: false,
-	},
 	type: {
 		type: String,
 		enum: ['member', 'owner', 'admin'],
 		required: true,
 		updated_at: Date
 	},
+	isRemoved: {
+		type: Boolean,
+		required: true,
+		default: false
+	}
 })
 
 const User = model<IUser>('User', userSchema)
