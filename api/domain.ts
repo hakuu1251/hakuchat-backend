@@ -7,8 +7,6 @@ const domainRouter = Router()
 
 domainRouter.post('/add', (req: Request, res: Response) => {
 	const isUser = User.findById(req.body.user).exec()
-	const response = res.setHeader("Content-Type", "application/json")
-	console.log(isUser)
 
 	isUser
 		.then(() => {
@@ -16,56 +14,81 @@ domainRouter.post('/add', (req: Request, res: Response) => {
 				url: req.body.url,
 				user: req.body.user,
 			})
+
 			domainDetails.save((err, doc) => {
 				if (!err) 
 				{
-					response.send({
+					res.status(200).json({
+						success: true,
 						url: doc.url,
-						user: doc.user,
-						isCreated: true
+						id: doc._id,
 					})
 				} 
 				else 
 				{
-					response.send({
-						error: err.message,
-						isCreated: false
+					res.status(400).json({
+						success: false,
+						message: err.message,
 					})
 				}
 			})
 		})
 		.catch((err) => {
-			response.send({
-				error: err.message,
-				isCreated: false
+			res.status(404).send({
+				success: false,
+				message: "User not found",
 			})
 		})
 })
 
-domainRouter.delete('/rm', (req: Request, res: Response) => {
-	const response = res.setHeader("Content-Type", "application/json")
-	// console.log(req.body)
+domainRouter.delete('/rm/:id', (req: Request, res: Response) => {
 
-	Domain.findOneAndRemove({url: req.body.url}, () => {
+	Domain.findById(req.params.id, (err: any, domain: any) => {
+		if (domain === null) {
+			return res.status(404).json({
+				success: false,
+				message: "Domain not found"
+			})
+		}
 
-		response.send(JSON.stringify({	
-			url: req.body.url,
-			isDeleted: true
-		}))
-		
+		if (err) {
+			return res.status(400).json({
+				success: false,
+				message: err && err.message
+			})
+		}
+
+		domain.remove((err: any, doc: any) => {
+			if (err) {
+				return res.status(400).json({
+					success: false,
+					message: err && err.message
+				})
+			}
+
+			return res.status(200).json({
+				success: true,
+				message: 'Successfully deleted domain',
+			})
+		})
 	})
-
 })
 
-domainRouter.get('/by-user', async (req: Request, res: Response) => {
-	const response = res.setHeader("Content-Type", "application/json")
-	// console.log(`Logs🧐:`, req)
-	try {
-		const docs = await Domain.find({user: req.query.user})
-		response.send(JSON.stringify(docs))
-	} catch(err: any) {
-		response.send(JSON.stringify({error: err || err.message}))
-	}
+domainRouter.get('/by-user/:id', (req: Request, res: Response) => {
+
+	Domain.find({user: req.params.id}, (err: any, docs: any) => {
+		if (err) {
+			return res.status(404).json({
+				success: false,
+				message: "Domain by user not found"
+			})
+		} 
+
+		return res.status(200).json({
+			success: true,
+			domains: docs
+		})
+	})
 })
 
 export default domainRouter

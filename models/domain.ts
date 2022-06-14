@@ -12,7 +12,8 @@ const domainSchema = new Schema<IDomain>({
 	},
 	user: {
 		type: Schema.Types.ObjectId,
-		ref: User
+		ref: User,
+		required: true
 	}
 })
 

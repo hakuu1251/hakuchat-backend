@@ -13,6 +13,7 @@ const userSchema = new Schema<IUser>({
 	type: {
 		type: String,
 		enum: ['member', 'owner', 'admin'],
+		default: 'member',
 		required: true,
 		updated_at: Date
 	},

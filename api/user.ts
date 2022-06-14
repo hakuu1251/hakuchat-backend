@@ -6,21 +6,25 @@ const userRouter = Router()
 
 userRouter.get('/all', (req: Request, res: Response) => {
 	User.find().lean().exec((err, users) => {
-		return res.send(JSON.stringify(users))
+		if (err) {
+			return res.status(400).json({
+				success: false,
+				message: err.message && err
+			})
+		}
+		
+		return res.status(200).json({
+			success: true,
+			users: users
+		})
 	})
 })
 
 userRouter.post('/create', async (req: Request, res: Response) => {
-	// console.log(req.body)
-
+	
 	// if user with current email is deleted
 	// remove his from db and create new user XDXDDDDDD
-	
 	// TODO: Add CASCADE remove operation
-	// User.pre('remove', (next) => {
-
-	// })
-
 	const oldUser = await User.findOne({email: req.body.email})
 	if (oldUser && oldUser.isRemoved === true) {
 		oldUser.remove()
@@ -32,46 +36,81 @@ userRouter.post('/create', async (req: Request, res: Response) => {
 		type: req.body.type
 	})
 
-	userDetails.save((err, doc) => {
-		const response = res.setHeader("Content-Type", "application/json")
+	userDetails.save((err: any, doc) => {
 
-		if (!err) 
+		if (err) 
 		{
-			response.send(JSON.stringify({
-				id: doc.id,
-				email: doc.email,
-				type: doc.type,
-				isCreated: true
-			}))
+			return res.status(400).json({
+				success: false,
+				message: err && err.message,
+			})
 		}
-		else 
-		{
-			response.send(JSON.stringify({
-				error: err.message,
-				isCreated: false
-			}))
-		} 
+
+		return res.status(200).json({
+			success: true,
+			id: doc._id,
+			email: doc.email,
+			type: doc.type,
+		})
+		
 	})
 })
 
-userRouter.put('/rm', async (req: Request, res: Response) => {
-	const response = res.setHeader("Content-Type", "application/json")
-	try {
-		await User.findOneAndUpdate({_id: req.body.id}, {isRemoved: true})
-		response.send(JSON.stringify({id: req.body.id, isRemoved: true}))
-	} catch(err: any) {
-		response.send(JSON.stringify({error: err || err.message}))
-	}
+userRouter.put('/rm/:id', (req: Request, res: Response) => {
+	console.log(req.params.id)
+	User.findById(req.params.id, (err: any, user: any) => {
+
+		if (err) {
+			res.status(404).json({
+				success: false,
+				message: "Filed to find user"
+			})
+		}
+
+		user.updateOne({isRemoved: true}, (err: any, doc: any) => {
+			if (err) {
+				return res.status(400).json({
+					success: false,
+					message: err.message && err
+				})
+			} 
+
+			return res.status(200).json({
+				success: true,
+				message: "User removed successfully"
+			})
+			
+		})
+
+	})
 })
 
-userRouter.put('/reset', async (req: Request, res: Response) => {
-	const response = res.setHeader("Content-Type", "application/json")
-	try {
-		await User.findOneAndUpdate({_id: req.body.id}, {isRemoved: false})
-		response.send(JSON.stringify({id: req.body.id, isRemoved: false}))
-	} catch(err: any) {
-		response.send(JSON.stringify({error: err || err.message}))
-	}
+userRouter.put('/reset/:id', (req: Request, res: Response) => {
+
+	User.findById(req.params.id, (err: any, user: any) => {
+
+		if (err) {
+			return res.status(404).json({
+				success: false,
+				message: "Filed to find user"
+			})
+		}
+
+		user.updateOne({isRemoved: false}, (err: any, doc: any) => {
+			if (err) {
+				return res.status(400).json({
+					success: false,
+					message: err.message && err
+				})
+			}
+
+			return res.status(200).json({
+				success: true,
+				message: "The user is successfully restored"
+			})
+		})
+
+	})
 })
 
 export default userRouter
