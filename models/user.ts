@@ -23,7 +23,7 @@ const userSchema = new Schema<IUser>({
 		required: true,
 		default: false
 	}
-})
+}, { timestamps: true })
 
 userSchema.post('remove', async (doc) => {
 	const { deletedCount } = await Domain.deleteMany({ user: doc.id })

@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express'
-import User from '../models/user'
+import { HydratedDocument } from 'mongoose'
 import { IUser } from '../types/user'
+import User from '../models/user'
 
 const userRouter = Router()
 
@@ -9,13 +10,36 @@ userRouter.get('/all', (req: Request, res: Response) => {
 		if (err) {
 			return res.status(400).json({
 				success: false,
-				message: err && err.message
+				message: err.message
 			})
 		}
 		
 		return res.status(200).json({
 			success: true,
 			users: users
+		})
+	})
+})
+
+userRouter.get('/id/:id', (req: Request, res: Response) => {
+	User.findById(req.params.id, (err: Error, user: HydratedDocument<IUser>) => {
+		if (err) {
+			return res.status(400).json({
+				success: false,
+				message: err.message
+			})
+		}
+
+		if (!user) {
+			return res.status(404).json({
+				success: false,
+				message: 'User not found'
+			})
+		}
+
+		return res.status(200).json({
+			success: true,
+			user: user
 		})
 	})
 })
@@ -29,19 +53,19 @@ userRouter.post('/create', async (req: Request, res: Response) => {
 		await oldUser.remove()
 	}
 
-	const userDetails = new User({
+	const userDetails: HydratedDocument<IUser> = new User({
 		username: req.body.username,
 		email: req.body.email,
 		type: req.body.type
 	})
 
-	userDetails.save((err: any, doc) => {
+	userDetails.save((err, doc) => {
 
 		if (err) 
 		{
 			return res.status(400).json({
 				success: false,
-				message: err && err.message,
+				message: err.message,
 			})
 		}
 
@@ -56,7 +80,7 @@ userRouter.post('/create', async (req: Request, res: Response) => {
 })
 
 userRouter.put('/rm/:id', (req: Request, res: Response) => {
-	User.findById(req.params.id, (err: any, user: any) => {
+	User.findById(req.params.id, (err: Error, user: HydratedDocument<IUser>) => {
 		if (!user) {
 			return res.status(404).json({
 				success: false,
@@ -67,7 +91,7 @@ userRouter.put('/rm/:id', (req: Request, res: Response) => {
 		if (err) {
 			return res.status(400).json({
 				success: false,
-				message: err && err.message
+				message: err.message
 			})
 		}
 
@@ -78,11 +102,11 @@ userRouter.put('/rm/:id', (req: Request, res: Response) => {
 			})
 		}
 
-		user.updateOne({isRemoved: true}, (err: any, doc: any) => {
+		user.updateOne({isRemoved: true}, (err: Error, doc: HydratedDocument<IUser>) => {
 			if (err) {
 				return res.status(400).json({
 					success: false,
-					message: err && err.message
+					message: err.message
 				})
 			} 
 
@@ -96,9 +120,9 @@ userRouter.put('/rm/:id', (req: Request, res: Response) => {
 	})
 })
 
-userRouter.put('/reset/:id', (req: Request, res: Response) => {
+userRouter.put('/restore/:id', (req: Request, res: Response) => {
 
-	User.findById(req.params.id, (err: any, user: any) => {
+	User.findById(req.params.id, (err: Error, user: HydratedDocument<IUser>) => {
 
 		if (!user) {
 			return res.status(404).json({
@@ -110,7 +134,7 @@ userRouter.put('/reset/:id', (req: Request, res: Response) => {
 		if (err) {
 			return res.status(400).json({
 				success: false,
-				message: err && err.message
+				message: err.message
 			})
 		}
 
@@ -121,11 +145,11 @@ userRouter.put('/reset/:id', (req: Request, res: Response) => {
 			})
 		}
 
-		user.updateOne({isRemoved: false}, (err: any, doc: any) => {
+		user.updateOne({isRemoved: false}, (err: Error, doc: HydratedDocument<IUser>) => {
 			if (err) {
 				return res.status(400).json({
 					success: false,
-					message: err && err.message
+					message: err.message
 				})
 			}
 

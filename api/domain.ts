@@ -1,16 +1,18 @@
 import { Router, Request, Response } from 'express'
+import { HydratedDocument } from 'mongoose'
+import { IDomain } from '../types/domain'
 import Domain from '../models/domain'
 import User from '../models/user'
 
 const domainRouter = Router()
 
 
-domainRouter.post('/add', async (req: Request, res: Response) => {
+domainRouter.post('/add', (req: Request, res: Response) => {
 	const isUser = User.findById(req.body.user).exec()
 
 	isUser
 		.then(() => {
-			const domainDetails = new Domain({
+			const domainDetails: HydratedDocument<IDomain> = new Domain({
 				url: req.body.url,
 				user: req.body.user,
 			})
@@ -33,7 +35,7 @@ domainRouter.post('/add', async (req: Request, res: Response) => {
 				}
 			})
 		})
-		.catch((err) => {
+		.catch((err: Error) => {
 			res.status(404).send({
 				success: false,
 				message: "User not found",
@@ -43,7 +45,7 @@ domainRouter.post('/add', async (req: Request, res: Response) => {
 
 domainRouter.delete('/rm/:id', (req: Request, res: Response) => {
 
-	Domain.findById(req.params.id, (err: any, domain: any) => {
+	Domain.findById(req.params.id, (err: Error, domain: HydratedDocument<IDomain>) => {
 		if (domain === null) {
 			return res.status(404).json({
 				success: false,
@@ -58,7 +60,7 @@ domainRouter.delete('/rm/:id', (req: Request, res: Response) => {
 			})
 		}
 
-		domain.remove((err: any, doc: any) => {
+		domain.remove((err: Error, doc: HydratedDocument<IDomain>) => {
 			if (err) {
 				return res.status(400).json({
 					success: false,
@@ -76,13 +78,20 @@ domainRouter.delete('/rm/:id', (req: Request, res: Response) => {
 
 domainRouter.get('/by-user/:id', (req: Request, res: Response) => {
 
-	Domain.find({user: req.params.id}, (err: any, docs: any) => {
-		if (err) {
+	Domain.find({user: req.params.id}, (err: Error, docs: Array<HydratedDocument<IDomain>>) => {
+		if (docs.length === 0) {
 			return res.status(404).json({
 				success: false,
-				message: "Domain by user not found"
+				message: "Domains not found"
 			})
 		} 
+
+		if (err) {
+			return res.status(400).json({
+				success: false,
+				message: err.message
+			})
+		}
 
 		return res.status(200).json({
 			success: true,
