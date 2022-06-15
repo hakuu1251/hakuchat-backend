@@ -1,7 +1,4 @@
-interface IRef {
-	$ref: string
-	$id: string
-}
+import IRef from './ref'
 
 export interface IDomain {
 	_id: string

@@ -15,8 +15,7 @@ const userSchema = new Schema<IUser>({
 		type: String,
 		enum: ['member', 'owner', 'admin'],
 		default: 'member',
-		required: true,
-		updated_at: Date
+		required: true
 	},
 	isRemoved: {
 		type: Boolean,
