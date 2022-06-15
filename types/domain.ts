@@ -1,9 +1,10 @@
 interface IRef {
-	$ref: string,
+	$ref: string
 	$id: string
 }
 
 export interface IDomain {
-	url: string,
+	_id: string
+	url: string
 	user: IRef
 }

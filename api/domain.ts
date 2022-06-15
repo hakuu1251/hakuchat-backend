@@ -5,7 +5,7 @@ import User from '../models/user'
 const domainRouter = Router()
 
 
-domainRouter.post('/add', (req: Request, res: Response) => {
+domainRouter.post('/add', async (req: Request, res: Response) => {
 	const isUser = User.findById(req.body.user).exec()
 
 	isUser
@@ -28,7 +28,7 @@ domainRouter.post('/add', (req: Request, res: Response) => {
 				{
 					res.status(400).json({
 						success: false,
-						message: err.message,
+						message: err && err.message,
 					})
 				}
 			})

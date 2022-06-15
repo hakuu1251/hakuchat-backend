@@ -1,6 +1,7 @@
 import { Schema, model } from 'mongoose'
 import validator from 'validator'
 import { IUser } from '../types/user'
+import Domain from './domain'
 
 const userSchema = new Schema<IUser>({
 	username: { type: String, required: true },
@@ -22,6 +23,11 @@ const userSchema = new Schema<IUser>({
 		required: true,
 		default: false
 	}
+})
+
+userSchema.post('remove', async (doc) => {
+	const { deletedCount } = await Domain.deleteMany({ user: doc.id })
+	console.log(`⚡️[server]: ` + deletedCount + ` domains of user ` + doc.id  + ` deleted`)
 })
 
 const User = model<IUser>('User', userSchema)

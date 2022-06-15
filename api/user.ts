@@ -1,15 +1,15 @@
 import { Router, Request, Response } from 'express'
 import User from '../models/user'
-
+import { IUser } from '../types/user'
 
 const userRouter = Router()
 
 userRouter.get('/all', (req: Request, res: Response) => {
-	User.find().lean().exec((err, users) => {
+	User.find().lean().exec((err: any, users: any) => {
 		if (err) {
 			return res.status(400).json({
 				success: false,
-				message: err.message && err
+				message: err && err.message
 			})
 		}
 		
@@ -24,10 +24,9 @@ userRouter.post('/create', async (req: Request, res: Response) => {
 	
 	// if user with current email is deleted
 	// remove his from db and create new user XDXDDDDDD
-	// TODO: Add CASCADE remove operation
-	const oldUser = await User.findOne({email: req.body.email})
+	const oldUser: any = await User.findOne({email: req.body.email})
 	if (oldUser && oldUser.isRemoved === true) {
-		oldUser.remove()
+		await oldUser.remove()
 	}
 
 	const userDetails = new User({
@@ -57,13 +56,25 @@ userRouter.post('/create', async (req: Request, res: Response) => {
 })
 
 userRouter.put('/rm/:id', (req: Request, res: Response) => {
-	console.log(req.params.id)
 	User.findById(req.params.id, (err: any, user: any) => {
+		if (!user) {
+			return res.status(404).json({
+				success: false,
+				message: "User not found"
+			})
+		}
 
 		if (err) {
-			res.status(404).json({
+			return res.status(400).json({
 				success: false,
-				message: "Filed to find user"
+				message: err && err.message
+			})
+		}
+
+		if (user.isRemoved) {
+			return res.status(200).json({
+				success: true,
+				message: "This user is already deleted"
 			})
 		}
 
@@ -71,7 +82,7 @@ userRouter.put('/rm/:id', (req: Request, res: Response) => {
 			if (err) {
 				return res.status(400).json({
 					success: false,
-					message: err.message && err
+					message: err && err.message
 				})
 			} 
 
@@ -89,10 +100,24 @@ userRouter.put('/reset/:id', (req: Request, res: Response) => {
 
 	User.findById(req.params.id, (err: any, user: any) => {
 
-		if (err) {
+		if (!user) {
 			return res.status(404).json({
 				success: false,
-				message: "Filed to find user"
+				message: "User not found"
+			})
+		}
+
+		if (err) {
+			return res.status(400).json({
+				success: false,
+				message: err && err.message
+			})
+		}
+
+		if (!user.isRemoved) {
+			return res.status(200).json({
+				success: true,
+				message: "This user is already restored"
 			})
 		}
 
@@ -100,7 +125,7 @@ userRouter.put('/reset/:id', (req: Request, res: Response) => {
 			if (err) {
 				return res.status(400).json({
 					success: false,
-					message: err.message && err
+					message: err && err.message
 				})
 			}
 
