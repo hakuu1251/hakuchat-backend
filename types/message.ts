@@ -1,8 +1,9 @@
 import IRef from './ref'
 
 export interface IMessage {
-	from: IRef
-	to: IRef
+	isGuest: boolean
+	user: IRef
+	guest: IRef
 	domain: IRef
 	text: string
 }

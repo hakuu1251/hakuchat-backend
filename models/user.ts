@@ -9,7 +9,7 @@ const userSchema = new Schema<IUser>({
 		type: String,
 		required: true,
 		unique: true,
-		validate: [validator.isEmail, 'invalid email']
+		validate: [validator.isEmail, 'Invalid email']
 	},
 	type: {
 		type: String,
